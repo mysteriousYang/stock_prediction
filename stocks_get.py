@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 import requests
 import os
-from xueqiu_api import k_line_minute_url
+# from xueqiu_api import k_line_url
 
 from file_utility import check_paths,exist_path,storge_stock
 from logger import Enable_Logger
@@ -9,8 +9,6 @@ from conf import headers,proxies
 
 
 def get_stocks():
-    check_paths()
-    Enable_Logger()
 
     # 可以获得多页股票的数据，不过本题只需50支股票，页数为1即可
     for pge in range(1):
@@ -27,4 +25,7 @@ def get_stocks():
         
 
 if __name__ == "__main__":
+    check_paths()
+    Enable_Logger()
+
     get_stocks()
