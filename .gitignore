@@ -3,3 +3,4 @@ data/
 logs/
 *.log
 *.pyc
+predict_result.csv

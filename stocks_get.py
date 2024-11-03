@@ -19,9 +19,13 @@ def get_stocks():
         # print(response.text)
 
     exist_path(".\\data\\stocks")
+    stocks_list = list()
 
     for stock in json_data["data"]["list"]:
         storge_stock(stock)
+        stocks_list.append(stock["symbol"])
+
+    return stocks_list
         
 
 if __name__ == "__main__":
