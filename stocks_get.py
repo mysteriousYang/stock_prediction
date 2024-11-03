@@ -9,6 +9,10 @@ from conf import headers,proxies
 def get_stocks():
     '''
     该函数用于获取股票的基本信息, 返回得到的股票代号列表
+    注: 由于爬取雪球的接口需要cookies, 可能导致代码无法运行
+        需要更新cookie, 即可运行.
+        同时, 因为测试机上有代理,所以指定了proxies字段
+        如有必要可将其删除.
     '''
     # 可以获得多页股票的数据，不过本题只需50支股票，页数为1即可
     for pge in range(1):
