@@ -41,5 +41,6 @@ if __name__ == "__main__":
         table["open"][symbol] = result["open"]
 
     merge_graphs()
+    # 这两个文件是预测数据的表格, 后续课程需要可直接读取
     pandas.DataFrame(table["close"]).to_csv(".\\predict_close_result.csv", index=False)
     pandas.DataFrame(table["open"]).to_csv(".\\predict_open_result.csv", index=False)

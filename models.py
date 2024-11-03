@@ -20,6 +20,41 @@ print("Using device:", device)
 
 # 模型定义
 class MultiStepLSTMWithEmbedding(nn.Module):
+    '''
+    这里借鉴了DLRM模型的结构, 对于分类数据, 采用embedding层将其转化为稠密数据
+    稠密数据输入到普通的全连接神经网络.
+    对于时间序列数据(其实本题的很多dense数据也可更改为时间序列数据), 我选择将其
+    纳入LSTM网络, 当然也可以使用RNN与CNN网络增强当前模型的效果,
+    RNN擅长处理时间序列任务, 而CNN可以从更高的维度获取数据的联系
+
+    DLRM网络的架构简图
+    output:
+                            vector of values
+    model:                        |
+                                 /\
+                                /__\
+                                |
+        _____________________> Op  <___________________
+     /                         |                      \
+     /\                        /\                      /\
+    /__\                      /__\           ...      /__\
+    |                          |                       |
+    |                         Op                      Op
+    |                    ____/__\_____           ____/__\____
+    |                   |_Emb_|____|__|    ...  |_Emb_|__|___|
+    input:
+    [ dense features ]     [sparse indices] , ..., [sparse indices]
+
+    对于后续15天数据的预测, 我选择直接在建立数据集的时候将后续15天的数据作为label
+    (详情参见dataset的构建代码)
+    也可以使用迭代预测的办法, 先预测1天的数据, 再将这一天的数据迭代预测后续若干
+    天的label
+
+    Todo List:
+    使用普通机器学习模型(如RF, SVM)对比预测
+    使用生成式模型(如GAN)生成预测数据
+    部分数据loss过大
+    '''
     def __init__(self, 
                  dense_input_size, 
                  sparse_input_size, 

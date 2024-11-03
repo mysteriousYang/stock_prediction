@@ -12,42 +12,38 @@ from file_utility import check_paths
 from torch.utils.data import DataLoader,Dataset
 from sklearn.preprocessing import normalize
 
+# 以下是该模型用到的字段与注解
+
 # 分类数据列名, 目前暂时没有用上
 # 以后可填入例如产业类型,上市交易所等信息
 sparse_cols = [
-    # "timestamp",
-    # "volume",
-    # "amount",
-    # "market_capital",
-    # "balance",
-    # "hold_volume_cn",
-    # "net_volume_cn",
+    # "type",
 ]
 
 # 连续数据列名
 dense_cols = [
-    "volume",
-    "amount",
-    "market_capital",
-    "balance",
-    "hold_volume_cn",
-    "net_volume_cn",
-    "chg",
-    "percent",
-    "pb",
-    "ps",
-    "pcf",
-    "hold_ratio_cn",
+    "volume",           #成交量
+    "amount",           #成交额
+    "market_capital",   #市场指数
+    "balance",          #余额
+    "hold_volume_cn",   #持仓量(中国市场)
+    "net_volume_cn",    #净买入量(中国市场)
+    "chg",              #涨跌额
+    "percent",          #涨跌幅百分比
+    "pb",               #市净率
+    "ps",               #市销率
+    "pcf",              #市现率
+    "hold_ratio_cn",    #持股比例(中国市场)
 ]
 
 # 时间序列数据, 用于LSTM网络输入
 time_cols = [
-    "timestamp", # 时间戳
-    "open", # 开盘价
-    "high", # 最高价
-    "low", # 最低价
+    "timestamp",    # 时间戳
+    "open",         # 开盘价
+    "high",         # 最高价
+    "low",          # 最低价
     "turnoverrate", # 换手率
-    "pe" # 市盈率
+    "pe"            # 市盈率
 ]
 
 # 这三个变量用于构建神经网络结构
@@ -133,6 +129,7 @@ def build_single_dataset(symbol:str,device:str):
     label_Y = np.array([],dtype=np.float64).reshape(0, 30)
 
     for period in ["day","week","month"]:
+        # 这一段代码的主要作用是读取和拼接数据
         csv_name = symbol + "_" + period + ".csv"
         csv_name = os.path.join(".\\data\\stocks",symbol,csv_name)
         
