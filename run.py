@@ -17,7 +17,6 @@ if __name__ == "__main__":
 
     print("正在获取股票信息")
     stocks_list = get_stocks()
-    # stocks_list = os.listdir(".\\data\\stocks")
     print("获取成功")
 
     print("正在获取详细信息")
@@ -26,12 +25,21 @@ if __name__ == "__main__":
     transfer_csv()
     print("完成")
 
+    # 如果已经下载好了股票信息, 可以把以上用于下载的代码注释掉
+    # 直接从磁盘读取需要处理的股票代码列表
+    # stocks_list = os.listdir(".\\data\\stocks")
+
     table = dict()
+    table["close"] = dict()
+    table["open"] = dict()
+
     print("正在开始训练和预测任务")
     for symbol in stocks_list:
-        result = predict(symbol)
+        result = predict(symbol, 50)
         draw_and_save(result)
-        table[symbol] = result["close"]
+        table["close"][symbol] = result["close"]
+        table["open"][symbol] = result["open"]
 
     merge_graphs()
-    pandas.DataFrame(table).to_csv(".\\predict_result.csv", index=False)
+    pandas.DataFrame(table["close"]).to_csv(".\\predict_close_result.csv", index=False)
+    pandas.DataFrame(table["open"]).to_csv(".\\predict_open_result.csv", index=False)

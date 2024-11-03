@@ -3,6 +3,13 @@ import os
 import sys
 import datetime
 
+'''
+这是一个输出记录器
+用于将每次运行的控制台结果记录到磁盘
+默认日志目录为./logs
+默认名称为运行时间
+'''
+
 LOG_FILE = ".\\logs\\" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + ".log"
 
 class Logger(object):

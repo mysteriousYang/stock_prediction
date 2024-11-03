@@ -3,4 +3,7 @@ data/
 logs/
 *.log
 *.pyc
+test.py
 predict_result.csv
+predict_close_result.csv
+predict_open_result.csv

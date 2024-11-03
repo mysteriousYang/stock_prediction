@@ -1,4 +1,6 @@
 # -*- coding:utf-8 -*-
+# 这个文件用于获取股票的详细信息
+# 主要是获取一些k线数据
 import requests
 import os
 from file_utility import check_paths,storge_stock_k_line,stock_to_csv
@@ -9,6 +11,10 @@ from conf import headers,proxies
 
 def get_k_line_data():
     '''
+    该函数用于从雪球下载每只股票的详细信息
+    会自动下载/data/stocks文件夹下所有股票的详细信息
+    将每个不同的period存储为不同的json
+
     Todo List:
     多线程下载器
     '''
@@ -27,6 +33,9 @@ def get_k_line_data():
     pass
 
 def transfer_csv():
+    '''
+    这个函数用于将获取到的股票k线数据json文件转化为便于构建数据集的csv
+    '''
     for symbol in os.listdir(".\\data\\stocks"):
 
         for file_name in os.listdir(f".\\data\\stocks\\{symbol}"):
