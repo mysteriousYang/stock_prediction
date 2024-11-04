@@ -11,7 +11,7 @@ from models import predict
 
 def draw_and_save(predict_json):
     '''
-    该函数接受predict的json结果, 并将15天的收盘价和开盘价存储为png
+    该函数接受predict的json结果, 并将5天的收盘价和开盘价存储为png
     '''
     save_path = f".\\data\\prediction\\{predict_json['symbol']}"
     exist_path(save_path)
@@ -19,16 +19,17 @@ def draw_and_save(predict_json):
     # 收盘价绘图
     graph_path = os.path.join(save_path, f"{predict_json['symbol']}_close.png")
 
-    x = range(1,16)
+    x = range(1,6)
     y = predict_json["close"]
     matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei']
     fontdict={'fontname': 'Microsoft YaHei', 'fontsize': 12}
 
     plt.plot(x, y, marker='o', color='b', linestyle='-', linewidth=2, markersize=5)
+    plt.xticks(range(1,6,1))
     plt.xlabel("天数",fontdict=fontdict)
     plt.ylabel("收盘价",fontdict=fontdict)
     plt.title(
-        f"{predict_json['symbol']} {predict_json['name']} 15天收盘价预测", fontdict=fontdict)
+        f"{predict_json['symbol']} {predict_json['name']} 5天收盘价预测", fontdict=fontdict)
     for i in range(len(x)):
         plt.text(x[i], y[i], f'{y[i]:.2f}', ha='center', va='bottom', fontsize=8, color='black')
 
@@ -40,16 +41,17 @@ def draw_and_save(predict_json):
     # 开盘价绘图
     graph_path = os.path.join(save_path, f"{predict_json['symbol']}_open.png")
 
-    x = range(1,16)
+    x = range(1,6)
     y = predict_json["open"]
     matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei']
     fontdict={'fontname': 'Microsoft YaHei', 'fontsize': 12}
 
     plt.plot(x, y, marker='o', color='b', linestyle='-', linewidth=2, markersize=5)
     plt.xlabel("天数",fontdict=fontdict)
+    plt.xticks(range(1,6,1))
     plt.ylabel("开盘价",fontdict=fontdict)
     plt.title(
-        f"{predict_json['symbol']} {predict_json['name']} 15天开盘价预测", fontdict=fontdict)
+        f"{predict_json['symbol']} {predict_json['name']} 5天开盘价预测", fontdict=fontdict)
     for i in range(len(x)):
         plt.text(x[i], y[i], f'{y[i]:.2f}', ha='center', va='bottom', fontsize=8, color='black')
 

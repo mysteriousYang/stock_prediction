@@ -17,7 +17,7 @@ def get_stocks():
     # 可以获得多页股票的数据，不过本题只需50支股票，页数为1即可
     for pge in range(1):
         url = 'https://xueqiu.com/service/v5/stock/screener/quote/list?page=%d&size=50&order=desc&orderby=percent&order_by=percent&market=CN&type=sh_sz&_=1623304455997' % (pge)
-        response = requests.get(url=url, headers=headers,proxies=proxies)
+        response = requests.get(url=url, headers=headers, proxies=proxies)
         json_data = response.json()
 
     exist_path(".\\data\\stocks")
@@ -26,6 +26,17 @@ def get_stocks():
     for stock in json_data["data"]["list"]:
         storge_stock(stock)
         stocks_list.append(stock["symbol"])
+
+    # 获得三大指数
+    # SH000001 上证指数
+    # SZ399001 深证指数
+    # SZ399006 创业板指
+    url = "https://stock.xueqiu.com/v5/stock/batch/quote.json?symbol=SH000001,SZ399001,SZ399006"
+    response = requests.get(url=url, headers=headers, proxies=proxies)
+    json_data = response.json()
+    for i in range(3):
+        storge_stock(json_data["data"]["items"][i]["quote"])
+        stocks_list.append(json_data["data"]["items"][i]["quote"]["symbol"])
 
     return stocks_list
         

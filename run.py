@@ -35,7 +35,10 @@ if __name__ == "__main__":
 
     print("正在开始训练和预测任务")
     for symbol in stocks_list:
-        result = predict(symbol, 50)
+        if(symbol in ("SH000001","SZ399001","SZ399006")):
+            result = predict(symbol, 50, 1)
+        else:
+            result = predict(symbol, 50)
         draw_and_save(result)
         table["close"][symbol] = result["close"]
         table["open"][symbol] = result["open"]

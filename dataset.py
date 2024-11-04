@@ -125,8 +125,8 @@ def build_single_dataset(symbol:str,device:str):
     time_X = np.array([],dtype=np.float64).reshape(0,len(time_cols))
 
 
-    # 综合收盘价和开盘价, Y的前15个元素是收盘价, 后15个是开盘价
-    label_Y = np.array([],dtype=np.float64).reshape(0, 30)
+    # 综合收盘价和开盘价, Y的前5个元素是收盘价, 后5个是开盘价
+    label_Y = np.array([],dtype=np.float64).reshape(0, 10)
 
     for period in ["day","week","month"]:
         # 这一段代码的主要作用是读取和拼接数据
@@ -151,33 +151,41 @@ def build_single_dataset(symbol:str,device:str):
         close_price = np.array(df["close"],np.float64)
         open_price = np.array(df["open"],np.float64)
         if(period == "day"):
-            # 将15天的数据合为一个Y label
-            final_index = len(df) - 15
-            label_sample = np.array([close_price[i:i+15] for i in range(final_index)], dtype=np.float64)
-            label_sample = np.hstack((label_sample, np.array([open_price[i:i+15] for i in range(final_index)], dtype=np.float64)))
+            # 将5天的数据合为一个Y label
+            final_index = len(df) - 5
+            label_sample = np.array([close_price[i:i+5] for i in range(final_index)], dtype=np.float64)
+            label_sample = np.hstack((label_sample, np.array([open_price[i:i+5] for i in range(final_index)], dtype=np.float64)))
 
             last_day = Last_Day_Sample(sparse_sample[-1],dense_sample[-1],time_sample[-1])
 
 
         elif(period == "week"):
+            # 这一堆代码是之前用于15天数据预测的, 先留着
+            '''
             # 将2周的数据合为一个Y lebel
-            final_index = len(df) - 1
-            label_sample = np.array([],dtype=np.float64).reshape(0, 30)
-            for i in range(final_index):
-                cf7 = np.full(7,close_price[i], dtype=np.float64)
-                cb7 = np.full(7,close_price[i+1], dtype=np.float64)
-                cavg = (close_price[i]+close_price[i+1])/2
+            # final_index = len(df) - 1
+            # label_sample = np.array([],dtype=np.float64).reshape(0, 30)
+            # for i in range(final_index):
+                # cf7 = np.full(7,close_price[i], dtype=np.float64)
+                # cb7 = np.full(7,close_price[i+1], dtype=np.float64)
+                # cavg = (close_price[i]+close_price[i+1])/2
 
-                of7 = np.full(7,open_price[i], dtype=np.float64)
-                ob7 = np.full(7,open_price[i+1], dtype=np.float64)
-                oavg = (open_price[i]+open_price[i+1])/2
+                # of7 = np.full(7,open_price[i], dtype=np.float64)
+                # ob7 = np.full(7,open_price[i+1], dtype=np.float64)
+                # oavg = (open_price[i]+open_price[i+1])/2
 
-                # 此处一个Y的结构为[前一周, 两周均值, 后一周]
-                label_sample = np.vstack((label_sample, np.hstack((cf7,cavg,cb7,of7,oavg,ob7), dtype=np.float64)))
+                # # 此处一个Y的结构为[前一周, 两周均值, 后一周]
+                # label_sample = np.vstack((label_sample, np.hstack((cf7,cavg,cb7,of7,oavg,ob7), dtype=np.float64)))
+            '''
+            c = [np.full(5,value) for value in close_price]
+            o = [np.full(5,value) for value in open_price]
+
+            # 这里后续5天的数据认定为第1天的数据
+            label_sample = np.hstack((c,o),dtype=np.float64)
 
         elif(period == "month"):
-            c = [np.full(15,value) for value in close_price]
-            o = [np.full(15,value) for value in open_price]
+            c = [np.full(5,value) for value in close_price]
+            o = [np.full(5,value) for value in open_price]
 
             # 这里后续15天的数据认定为第1天的数据
             label_sample = np.hstack((c,o),dtype=np.float64)

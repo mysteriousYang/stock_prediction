@@ -62,7 +62,7 @@ class MultiStepLSTMWithEmbedding(nn.Module):
                  time_series_input_size, 
                  hidden_size=50, 
                  num_layers=2, 
-                 output_steps=30):
+                 output_steps=10):
         super(MultiStepLSTMWithEmbedding, self).__init__()
         # 注:这里数据使用的float64,所以网络层的数据类型都需要修改成float64
         
@@ -79,7 +79,8 @@ class MultiStepLSTMWithEmbedding(nn.Module):
         self.lstm = nn.LSTM(time_series_input_size, hidden_size, num_layers, batch_first=True, dtype=torch.float64)
         self.fc_lstm = nn.Linear(hidden_size, 10, dtype=torch.float64)
         
-        # 最终输出层，合并所有特征并输出未来15天的价格
+        # 最终输出层，合并所有特征并输出未来5天的价格
+        # 这里的30是75行的20与80行的10相加
         self.fc_out = nn.Linear(30, output_steps, dtype=torch.float64)
 
     def forward(self, dense_inputs, sparse_inputs, time_series):
@@ -105,7 +106,7 @@ class MultiStepLSTMWithEmbedding(nn.Module):
 
 
 
-def train(dataset,num_epochs=30):
+def train(dataset,num_epochs=30,lr=0.01):
     '''
     该函数用于训练模型并存储
     默认epochs为30
@@ -129,7 +130,7 @@ def train(dataset,num_epochs=30):
                                     time_series_input_size=time_series_input_size).to(device)
     # 使用MSE评价函数与Adam优化方法
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     # 训练模型
     model.train()
@@ -157,7 +158,7 @@ def train(dataset,num_epochs=30):
     return model
 
 
-def predict(symbol:str, epochs=30):
+def predict(symbol:str, epochs=30, lr=0.01):
     '''
     这个函数用于预测代码为symbol的股票
     将预测好的结果存为json
@@ -175,7 +176,7 @@ def predict(symbol:str, epochs=30):
     if(os.path.exists(model_path)):
         model = torch.load(model_path)
     else:
-        model = train(train_dataset,epochs)
+        model = train(train_dataset,epochs,lr)
 
     # 将模型切换为预测模式并进行预测
     model.eval()
@@ -184,10 +185,10 @@ def predict(symbol:str, epochs=30):
                     train_dataset.last_sparse(device),
                     train_dataset.last_time_series(device)).cpu().numpy()
         result = result.flatten()
-        print(f"{symbol} {stock_name} 股票的接下来15天收盘价预测为")
-        print(result[:15])
-        print(f"{symbol} {stock_name} 股票的接下来15天开盘价预测为")
-        print(result[15:])
+        print(f"{symbol} {stock_name} 股票的接下来5天收盘价预测为")
+        print(result[:5])
+        print(f"{symbol} {stock_name} 股票的接下来5天开盘价预测为")
+        print(result[5:])
 
     # 存储预测结果为json
     dump_path = f".\\data\\prediction\\{symbol}"
@@ -196,8 +197,8 @@ def predict(symbol:str, epochs=30):
     json_data = dict()
     json_data["name"] = stock_name
     json_data["symbol"] = symbol
-    json_data["close"] = list(result[:15])
-    json_data["open"] = list(result[15:])
+    json_data["close"] = list(result[:5])
+    json_data["open"] = list(result[5:])
 
     with open(os.path.join(dump_path,f"{symbol}.json"),"w",encoding="utf-8") as fp:
         json.dump(json_data, fp, ensure_ascii=False)

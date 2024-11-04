@@ -55,6 +55,6 @@ if __name__ == "__main__":
     check_paths()
     Enable_Logger()
 
-    # get_k_line_data()
+    get_k_line_data()
     transfer_csv()
     pass
