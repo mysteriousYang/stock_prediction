@@ -30,6 +30,7 @@ dense_cols = [
     "net_volume_cn",    #净买入量(中国市场)
     "chg",              #涨跌额
     "percent",          #涨跌幅百分比
+    "pe",               # 市盈率
     "pb",               #市净率
     "ps",               #市销率
     "pcf",              #市现率
@@ -40,10 +41,11 @@ dense_cols = [
 time_cols = [
     "timestamp",    # 时间戳
     "open",         # 开盘价
+    "close",        # 收盘价
     "high",         # 最高价
     "low",          # 最低价
     "turnoverrate", # 换手率
-    "pe"            # 市盈率
+    # "pe"            # 市盈率
 ]
 
 # 这三个变量用于构建神经网络结构

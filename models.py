@@ -54,6 +54,7 @@ class MultiStepLSTMWithEmbedding(nn.Module):
     使用普通机器学习模型(如RF, SVM)对比预测
     使用生成式模型(如GAN)生成预测数据
     部分数据loss过大
+    用于单独处理三个指数的模型
     '''
     def __init__(self, 
                  dense_input_size, 
@@ -61,7 +62,7 @@ class MultiStepLSTMWithEmbedding(nn.Module):
                  sparse_embedding_dims,
                  time_series_input_size, 
                  hidden_size=50, 
-                 num_layers=2, 
+                 num_layers=3, 
                  output_steps=10):
         super(MultiStepLSTMWithEmbedding, self).__init__()
         # 注:这里数据使用的float64,所以网络层的数据类型都需要修改成float64
@@ -72,7 +73,11 @@ class MultiStepLSTMWithEmbedding(nn.Module):
         
         # 稠密特征的全连接层
         dense_emb_size = dense_input_size + sum([emb_dim for _, emb_dim in sparse_embedding_dims])
-        self.fc_dense = nn.Linear(dense_emb_size, 20, dtype=torch.float64)
+        # 由于稠密特征不一定全部有效(例如三个指数), 所以增加了ReLU层
+        self.fc_dense1 = nn.Linear(dense_emb_size, 30, dtype=torch.float64)
+        self.fc_dense2 = nn.Linear(30, 25, dtype=torch.float64)
+        self.relu_dense = nn.ReLU()
+        self.fc_dense3 = nn.Linear(25, 20, dtype=torch.float64)
 
         
         # 时间序列特征的LSTM层
@@ -80,8 +85,8 @@ class MultiStepLSTMWithEmbedding(nn.Module):
         self.fc_lstm = nn.Linear(hidden_size, 10, dtype=torch.float64)
         
         # 最终输出层，合并所有特征并输出未来5天的价格
-        # 这里的30是75行的20与80行的10相加
-        self.fc_out = nn.Linear(30, output_steps, dtype=torch.float64)
+        self.fc_out1 = nn.Linear(30, 20, dtype=torch.float64)
+        self.fc_out2 = nn.Linear(20, output_steps, dtype=torch.float64)
 
     def forward(self, dense_inputs, sparse_inputs, time_series):
         # 嵌入层处理稀疏特征
@@ -93,7 +98,10 @@ class MultiStepLSTMWithEmbedding(nn.Module):
         # dense_out = self.fc_dense(dense_combined)
         
         # 此处没有用到sparse所以不启用dense_combined
-        dense_out = self.fc_dense(dense_inputs)
+        dense_out = self.fc_dense1(dense_inputs)
+        dense_out = self.relu_dense(dense_out)
+        dense_out = self.fc_dense2(dense_out)
+        dense_out = self.fc_dense3(dense_out)
         
         # LSTM处理时间序列特征
         lstm_out, _ = self.lstm(time_series)
@@ -102,7 +110,8 @@ class MultiStepLSTMWithEmbedding(nn.Module):
         
         # 合并所有特征并输出15天预测
         combined = torch.cat((dense_out, lstm_out), dim=1)
-        return self.fc_out(combined)
+        combined = self.fc_out1(combined)
+        return self.fc_out2(combined)
 
 
 
@@ -129,8 +138,9 @@ def train(dataset,num_epochs=30,lr=0.01):
                                     sparse_embedding_dims=sparse_embedding_dims,
                                     time_series_input_size=time_series_input_size).to(device)
     # 使用MSE评价函数与Adam优化方法
+    # 此处增加了0.1的权重衰减, 用于丢弃某些不重要的神经元
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=0.1)
 
     # 训练模型
     model.train()
@@ -158,7 +168,7 @@ def train(dataset,num_epochs=30,lr=0.01):
     return model
 
 
-def predict(symbol:str, epochs=30, lr=0.01):
+def predict(symbol:str, epochs=30, lr=0.001):
     '''
     这个函数用于预测代码为symbol的股票
     将预测好的结果存为json
